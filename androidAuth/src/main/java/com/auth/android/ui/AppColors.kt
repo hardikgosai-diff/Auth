@@ -11,6 +11,7 @@ object AppColors {
 
     const val whiteHexFormat = 0xFFFFFFFF
     const val blackHexFormat = 0xFF000000
+    const val black50HexFormat = 0x80000000
     const val transparentHexFormat = 0x00000000
     const val appColorHexFormat = 0xFFF1393C
     const val appTextHexFormat = 0xFF9C9C9C
@@ -21,6 +22,7 @@ object AppColors {
 
     val white = Color(whiteHexFormat)
     val black = Color(blackHexFormat)
+    val black50 = Color(black50HexFormat)
     val transparent = Color(transparentHexFormat)
     val appColor = Color(appColorHexFormat)
     val appText = Color(appTextHexFormat)

@@ -59,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.auth.android.R
 import com.auth.android.base.BaseActivity
+import com.auth.android.dialogs.Progress.ShowProgress
 import com.auth.android.extensions.ComposableExtensions.noRippleClickable
 import com.auth.android.ui.AppColors
 import com.auth.android.ui.AuthTheme
@@ -66,6 +67,7 @@ import com.auth.android.utils.GoogleSignIn
 
 class SignInActivity : BaseActivity() {
 
+    private var showProgress by mutableStateOf(false)
     private var googleSignIn: GoogleSignIn? = null
 
     override fun onCreate() {
@@ -74,6 +76,7 @@ class SignInActivity : BaseActivity() {
 
     private fun initGoogleSignIn() {
         googleSignIn = GoogleSignIn(this) { authResult ->
+            showProgress = false
             if (authResult.isSuccessful) {
 
             } else {
@@ -93,6 +96,11 @@ class SignInActivity : BaseActivity() {
             ) {
                 TopHeader()
                 ContentView()
+            }
+
+            if (showProgress) {
+                googleSignIn?.signIn()
+                ShowProgress()
             }
         }
     }
@@ -369,7 +377,9 @@ class SignInActivity : BaseActivity() {
             )
         }
 
-        OutlinedButton(modifier = Modifier
+        GoogleSignInButton()
+
+        /*OutlinedButton(modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
             colors = ButtonDefaults.outlinedButtonColors(
@@ -377,7 +387,7 @@ class SignInActivity : BaseActivity() {
             ),
             border = BorderStroke(1.dp, AppColors.unfocused),
             onClick = {
-                googleSignIn?.signIn()
+                viewModel.showProgress = true
             }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
@@ -391,7 +401,7 @@ class SignInActivity : BaseActivity() {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-        }
+        }*/
 
         Row(
             modifier = Modifier
@@ -415,6 +425,33 @@ class SignInActivity : BaseActivity() {
                 color = AppColors.appColor,
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
+
+    @Composable
+    private fun GoogleSignInButton() {
+        OutlinedButton(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = AppColors.white, contentColor = AppColors.black
+            ),
+            border = BorderStroke(1.dp, AppColors.unfocused),
+            onClick = {
+                showProgress = true
+            }) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(id = R.drawable.ic_google),
+                    contentDescription = "Google icon"
+                )
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = "Continue with Google",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 
