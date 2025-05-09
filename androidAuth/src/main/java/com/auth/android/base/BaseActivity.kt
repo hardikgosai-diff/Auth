@@ -8,7 +8,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.auth.android.ui.AppColors
-import com.auth.android.ui.Preferences
 
 /**
  * 02/05/25.
@@ -17,8 +16,6 @@ import com.auth.android.ui.Preferences
  */
 abstract class BaseActivity : ComponentActivity() {
 
-    val preferences by lazy { Preferences(this) }
-
     abstract fun onCreate()
 
     @Composable
@@ -26,7 +23,7 @@ abstract class BaseActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        println("Base")
         onCreate()
         setContent { AppContent() }
     }

@@ -2,6 +2,7 @@ package com.auth.android.utils
 
 import android.app.Activity
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.auth.android.R
@@ -28,17 +29,7 @@ class GoogleSignIn(
 
     private val signInLauncher =
         activity.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            withTryCatch {
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
-                    val idToken = credential.googleIdToken
-                    if (idToken != null) {
-                        firebaseAuthWithGoogle(idToken)
-                    } else {
-                        onCompleteListener.onComplete(Tasks.forCanceled())
-                    }
-                } else onCompleteListener.onComplete(Tasks.forCanceled())
-            }
+            handleResult(result)
         }
 
     fun signIn() {
@@ -57,6 +48,20 @@ class GoogleSignIn(
             } else {
                 onCompleteListener.onComplete(Tasks.forCanceled())
             }
+        }
+    }
+
+    fun handleResult(result: ActivityResult) {
+        withTryCatch {
+            if (result.resultCode == Activity.RESULT_OK) {
+                val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+                val idToken = credential.googleIdToken
+                if (idToken != null) {
+                    firebaseAuthWithGoogle(idToken)
+                } else {
+                    onCompleteListener.onComplete(Tasks.forCanceled())
+                }
+            } else onCompleteListener.onComplete(Tasks.forCanceled())
         }
     }
 

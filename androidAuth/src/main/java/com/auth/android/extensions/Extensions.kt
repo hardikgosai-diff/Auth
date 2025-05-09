@@ -2,6 +2,7 @@ package com.auth.android.extensions
 
 import android.app.Activity
 import android.content.Intent
+import android.widget.Toast
 
 /**
  * 07/05/25.
@@ -23,6 +24,18 @@ object Extensions {
         val intent = Intent(this, it)
         intent.action = action
         startActivity(intent)
+    }
+
+    fun Activity.toast(message: String) {
+        withTryCatch {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun Activity.toast(message: Int) {
+        withTryCatch {
+            Toast.makeText(this, getString(message), Toast.LENGTH_SHORT).show()
+        }
     }
 
 }

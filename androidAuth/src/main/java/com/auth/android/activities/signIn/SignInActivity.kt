@@ -1,6 +1,7 @@
-package com.auth.android.activities
+package com.auth.android.activities.signIn
 
-import android.util.Patterns
+import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -36,13 +37,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -58,50 +56,45 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.auth.android.R
-import com.auth.android.base.BaseActivity
-import com.auth.android.dialogs.Progress.ShowProgress
+import com.auth.android.dialogs.Alerts.ShowProgress
 import com.auth.android.extensions.ComposableExtensions.noRippleClickable
 import com.auth.android.ui.AppColors
 import com.auth.android.ui.AuthTheme
-import com.auth.android.utils.GoogleSignIn
 
-class SignInActivity : BaseActivity() {
+class SignInActivity : SignInBase() {
 
-    private var showProgress by mutableStateOf(false)
-    private var googleSignIn: GoogleSignIn? = null
-
-    override fun onCreate() {
-        initGoogleSignIn()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            AppContent()
+        }
     }
 
-    private fun initGoogleSignIn() {
-        googleSignIn = GoogleSignIn(this) { authResult ->
-            showProgress = false
-            if (authResult.isSuccessful) {
-
-            } else {
-
+    @Preview
+    @Composable
+    fun AppContent() {
+        AuthTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                OnSurfaceCreated()
             }
         }
     }
 
-    @Preview(showBackground = true, backgroundColor = AppColors.whiteHexFormat)
     @Composable
-    override fun OnSurfaceCreated() {
-        AuthTheme {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(state = rememberScrollState())
-            ) {
-                TopHeader()
-                ContentView()
-            }
+    fun OnSurfaceCreated() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState())
+        ) {
+            TopHeader()
+            ContentView()
+        }
 
-            if (showProgress) {
-                googleSignIn?.signIn()
-                ShowProgress()
-            }
+        if (showProgress) {
+            ShowProgress()
         }
     }
 
@@ -134,15 +127,6 @@ class SignInActivity : BaseActivity() {
     @Composable
     private fun ContentView() {
 
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var showEmailError by remember { mutableStateOf(false) }
-        var showPasswordError by remember { mutableStateOf(false) }
-        var passwordVisible by remember { mutableStateOf(false) }
-        var rememberMe by remember { mutableStateOf(false) }
-        var isEmailFocused by remember { mutableStateOf(false) }
-        var isPasswordFocused by remember { mutableStateOf(false) }
-
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -151,23 +135,6 @@ class SignInActivity : BaseActivity() {
             if (rememberMe) {
                 email = preferences.user.safeEmail
             }
-        }
-
-        fun onSignIn() {
-            showEmailError = !Patterns.EMAIL_ADDRESS.matcher(email).matches()
-
-            if (showEmailError) return
-
-            showPasswordError = !Regex(
-                "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&#^+=._-]).{6,}$"
-            ).matches(password)
-
-            if (showPasswordError) return
-
-            focusManager.clearFocus()
-            keyboardController?.hide()
-
-            preferences.rememberMe = rememberMe
         }
 
         OutlinedTextField(modifier = Modifier
@@ -332,24 +299,7 @@ class SignInActivity : BaseActivity() {
             )
         }
 
-        Button(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            enabled = email.isNotEmpty() && password.isNotEmpty(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = AppColors.appColor,
-                contentColor = AppColors.white,
-                disabledContainerColor = AppColors.appColor.copy(alpha = 0.5f),
-                disabledContentColor = AppColors.white.copy(alpha = 0.5f)
-            ),
-            onClick = { onSignIn() }) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Sign In",
-                color = AppColors.white,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+        EmailPasswordSignInButton()
 
         Row(
             modifier = Modifier
@@ -379,30 +329,6 @@ class SignInActivity : BaseActivity() {
 
         GoogleSignInButton()
 
-        /*OutlinedButton(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = AppColors.white, contentColor = AppColors.black
-            ),
-            border = BorderStroke(1.dp, AppColors.unfocused),
-            onClick = {
-                viewModel.showProgress = true
-            }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(id = R.drawable.ic_google),
-                    contentDescription = "Google icon"
-                )
-                Text(
-                    modifier = Modifier.padding(8.dp),
-                    text = "Continue with Google",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }*/
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -429,6 +355,37 @@ class SignInActivity : BaseActivity() {
     }
 
     @Composable
+    private fun EmailPasswordSignInButton() {
+        val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
+
+        Button(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            enabled = email.isNotEmpty() && password.isNotEmpty(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AppColors.appColor,
+                contentColor = AppColors.white,
+                disabledContainerColor = AppColors.appColor.copy(alpha = 0.5f),
+                disabledContentColor = AppColors.white.copy(alpha = 0.5f)
+            ),
+            onClick = {
+                if (isEmailPasswordValid()) {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    onEmailPasswordSignIn()
+                }
+            }) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = "Sign In",
+                color = AppColors.white,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+
+    @Composable
     private fun GoogleSignInButton() {
         OutlinedButton(modifier = Modifier
             .fillMaxWidth()
@@ -439,6 +396,7 @@ class SignInActivity : BaseActivity() {
             border = BorderStroke(1.dp, AppColors.unfocused),
             onClick = {
                 showProgress = true
+                googleSignIn?.signIn()
             }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
