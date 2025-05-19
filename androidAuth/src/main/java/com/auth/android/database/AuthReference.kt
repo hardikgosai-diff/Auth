@@ -1,6 +1,7 @@
 package com.auth.android.database
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 /**
  * 06/01/25.
@@ -9,9 +10,11 @@ import com.google.firebase.auth.FirebaseAuth
  */
 object AuthReference {
 
-    val firebaseAuth by lazy { FirebaseAuth.getInstance() }
+    val firebaseAuth: FirebaseAuth
+        get() = FirebaseAuth.getInstance()
 
-    val currentUser by lazy { firebaseAuth.currentUser }
+    val currentUser: FirebaseUser?
+        get() = firebaseAuth.currentUser
 
     val isLoggedIn: Boolean
         get() = firebaseAuth.currentUser != null

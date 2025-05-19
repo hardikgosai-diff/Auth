@@ -1,5 +1,6 @@
 package com.auth.android.database
 
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
 /**
@@ -9,7 +10,8 @@ import com.google.firebase.database.FirebaseDatabase
  */
 object DatabaseReference {
 
-    private val databaseReference by lazy { FirebaseDatabase.getInstance().reference }
+    private val databaseReference: DatabaseReference
+        get() = FirebaseDatabase.getInstance().reference
 
     fun usersRef() = databaseReference.child("users")
 

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Auth</string>
-
+    <string name="if_this_email_is_registered_a_password_reset_link_has_been_sent">If this email is registered, a password reset link has been sent</string>
+    <string name="error">Error</string>
+    <string name="not_logged_in_yet">Not logged in yet</string>
 </resources>
